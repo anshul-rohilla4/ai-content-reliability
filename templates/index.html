@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RightINFO — Content Reliability Scorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6M11 8v6"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">RightINFO</span>
+  </a>
+  <span class="nav-badge">CSE Final Year Project</span>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Content Reliability Scoring System</div>
+    <h1>How reliable is <em>this content?</em></h1>
+    <p>RightINFO evaluates content trustworthiness using an ensemble of classical ML, transformer models, and physics-based signal analysis — producing a reliability score with full explanation.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-value">3</div><div class="stat-label">Text Models</div></div>
+      <div class="stat"><div class="stat-value">5</div><div class="stat-label">Image Signals</div></div>
+      <div class="stat"><div class="stat-value">728K</div><div class="stat-label">Training Samples</div></div>
+      <div class="stat"><div class="stat-value">98.85%</div><div class="stat-label">Best Model Acc.</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('text',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Text
+    </button>
+    <button class="tab-btn" onclick="switchTab('image',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Image
+    </button>
+    <button class="tab-btn" onclick="switchTab('url',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      URL
+    </button>
+  </div>
+
+  <!-- TEXT -->
+  <div id="panel-text" class="panel active">
+    <div class="card">
+      <label class="field-label">Input Text</label>
+      <p class="field-hint">Paste any text — article, essay, email, or social post. Minimum 50 characters for reliable scoring.</p>
+      <textarea id="text-input" placeholder="Paste your text here..."></textarea>
+      <button class="btn-analyze" onclick="analyzeText()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Score Reliability
+      </button>
+    </div>
+    <div class="loader" id="text-loader"><div class="spinner"></div><p>Running multi-model analysis...</p></div>
+    <div class="error-box" id="text-error"></div>
+    <div class="result card" id="text-result"></div>
+  </div>
+
+  <!-- IMAGE -->
+  <div id="panel-image" class="panel">
+    <div class="card">
+      <label class="field-label">Upload Image</label>
+      <p class="field-hint">Supports JPG, PNG, WEBP. Analyzed using 3 AI models + FFT frequency analysis + sensor noise analysis.</p>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="image-input" accept="image/*" onchange="previewImage(this)">
+        <div class="upload-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="upload-text"><strong>Click to upload</strong> or drag and drop</p>
+        <div id="image-preview"><img id="preview-img" src="" alt="Preview"></div>
+      </div>
+      <button class="btn-analyze" onclick="analyzeImage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Score Reliability
+      </button>
+    </div>
+    <div class="loader" id="image-loader"><div class="spinner"></div><p>Running signal analysis...</p></div>
+    <div class="error-box" id="image-error"></div>
+    <div class="result card" id="image-result"></div>
+  </div>
+
+  <!-- URL -->
+  <div id="panel-url" class="panel">
+    <div class="card">
+      <label class="field-label">Article URL</label>
+      <p class="field-hint">Enter a public article URL. RightINFO extracts and scores both text and images from the page.</p>
+      <input type="url" class="input-field" id="url-input" placeholder="https://example.com/article">
+      <button class="btn-analyze" onclick="analyzeURL()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Score Reliability
+      </button>
+    </div>
+    <div class="loader" id="url-loader"><div class="spinner"></div><p>Scraping and scoring content...</p></div>
+    <div class="error-box" id="url-error"></div>
+    <div class="result card" id="url-result"></div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>RightINFO</strong> — Content Reliability Scoring System · Results are probabilistic. Not intended as sole basis for punitive action.
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
